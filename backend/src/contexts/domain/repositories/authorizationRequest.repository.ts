@@ -4,4 +4,5 @@ import { AuthorizationRequest, PrimitiveAuthorizationRequest } from "../entities
 export abstract class AuthorizationRequestRepository extends GenericRepository<AuthorizationRequest, PrimitiveAuthorizationRequest> {
   abstract findAllByIdUser(userId: string): Promise<AuthorizationRequest[] | null>
   abstract findAllPendingByIdUser(userId: string): Promise<AuthorizationRequest[] | null>
+  abstract update(requestId: string, data: Partial<PrimitiveAuthorizationRequest>): Promise<AuthorizationRequest>
 }

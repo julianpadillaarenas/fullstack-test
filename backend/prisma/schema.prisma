@@ -6,10 +6,68 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum AuthorizationRequestTypeOfRequest {
+  deployment
+  access
+  technical_change
+}
+
+enum AuthorizationRequestStatus {
+  approve
+  denied
+  pending
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  requests  AuthorizationRequest[] @relation("requestingUser")
+  responsibleRequests AuthorizationRequest[] @relation("responsibleUser")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AuthorizationRequest {
+  id                 String   @id @default(uuid())
+  title              String
+  description        String
+  requestingUserId   String
+  responsibleUserId  String
+  typeOfRequest      AuthorizationRequestTypeOfRequest
+  status             AuthorizationRequestStatus
+  history            AuthorizationRequestHistory[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([requestingUserId])
+  @@index([responsibleUserId])
+  @@map("authorization_requests")
+
+  // relations
+  requestingUser  User @relation("requestingUser", fields: [requestingUserId], references: [id])
+  responsibleUser User @relation("responsibleUser", fields: [responsibleUserId], references: [id])
+}
+
+model AuthorizationRequestHistory {
+  id                     String   @id @default(uuid())
+  authorizationRequestId String
+  status                 AuthorizationRequestStatus
+  date                   DateTime @default(now())
+  actionUserId           String
+  commentary             String
+
+  request AuthorizationRequest @relation(fields: [authorizationRequestId], references: [id])
+
+  @@index([authorizationRequestId])
+  @@map("authorization_request_histories")
+}
+

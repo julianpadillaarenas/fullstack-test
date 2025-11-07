@@ -4,7 +4,7 @@ import { AuthorizationRequestHistory } from "./authorizationRequestHistory";
 export enum AuthorizationRequestTypeOfRequest {
   DEPLOYMENT = "deployment",
   ACCESS = "access",
-  TECHNICAL_CHANGE = "technical change",
+  TECHNICAL_CHANGE = "technical_change",
 }
 
 export enum AuthorizationRequestStatus {
@@ -41,7 +41,7 @@ export class AuthorizationRequest {
     requestingUserId,
     responsibleUserId,
     title,
-    status
+    status,
   }:PrimitiveAuthorizationRequest){
     this.id = id ?? uuidv4()
     this.title = title
@@ -50,7 +50,6 @@ export class AuthorizationRequest {
     this.requestingUserId = requestingUserId
     this.responsibleUserId = responsibleUserId
     this.typeOfRequest = typeOfRequest
-    
     this.ensureIsValid()
   }
 
@@ -99,15 +98,15 @@ export class AuthorizationRequest {
       commentary: `creacion de solicitud`,
       status: data.status
     })
-
     authorizationRequest.history?.push(history)
+    
     return authorizationRequest
   }
 
 
   approved(actionUserId: string, commentary: string){
     if (!this.isValidUUID(actionUserId)) throw new Error("actionUserId debe ser uuid válido");
-    if(this.responsibleUserId === actionUserId) throw new Error("El Usuario no es el responsable de esta solicitud");
+    if(this.responsibleUserId !== actionUserId) throw new Error("El Usuario no es el responsable de esta solicitud");
     if(this.status === AuthorizationRequestStatus.APPROVE) throw new Error("La Solicitud ya fue aprovada");
 
     this.status = AuthorizationRequestStatus.APPROVE
@@ -115,7 +114,7 @@ export class AuthorizationRequest {
       ...this,
       commentary,
       actionUserId,
-      authorizationRequestId: ""
+      authorizationRequestId: this.id
     })
 
     this.history?.push(h)
@@ -123,7 +122,7 @@ export class AuthorizationRequest {
 
   denied(actionUserId: string, commentary: string){
     if (!this.isValidUUID(actionUserId)) throw new Error("actionUserId debe ser uuid válido");
-    if(this.responsibleUserId === actionUserId) throw new Error("El Usuario no es el responsable de esta solicitud");
+    if(this.responsibleUserId !== actionUserId) throw new Error("El Usuario no es el responsable de esta solicitud");
     if(this.status === AuthorizationRequestStatus.DENIED) throw new Error("La Solicitud ya fue denegada");
 
     this.status = AuthorizationRequestStatus.DENIED
@@ -131,7 +130,7 @@ export class AuthorizationRequest {
       ...this,
       commentary,
       actionUserId,
-      authorizationRequestId: ""
+      authorizationRequestId: this.id
     })
 
     this.history?.push(h)
