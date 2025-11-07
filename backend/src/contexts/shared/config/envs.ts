@@ -5,10 +5,6 @@ import { config } from 'dotenv'
 const envSchema = zod.object({
   PORT: zod.string().transform((val) => parseInt(val)).nonoptional(),
   DATABASE_URL:  zod.string().nonempty(),
-  UAT_SANDBOX_URL:  zod.string().nonempty(),
-  UAT_SANDBOX_PUBLIC_KEY:  zod.string().nonempty(),
-  UAT_SANDBOX_PRIVATE_KEY:  zod.string().nonempty(),
-  UAT_SANDBOX_INTEGRITY_KEY:  zod.string().nonempty(),
 })
 
 type IEnv = zod.infer<typeof envSchema>
@@ -37,8 +33,4 @@ class Env {
 export const {
   PORT,
   DATABASE_URL,
-  UAT_SANDBOX_INTEGRITY_KEY,
-  UAT_SANDBOX_PRIVATE_KEY,
-  UAT_SANDBOX_PUBLIC_KEY,
-  UAT_SANDBOX_URL,
 }: IEnv = Env.getInstance()
